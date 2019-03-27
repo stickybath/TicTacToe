@@ -32,7 +32,6 @@ impl Default for Cell {
  *     Display trait implementation for Cell
  */
 impl Display for Cell {
-
 	/**
 	 * @brief fmt method
 	 *     allows for formatted printing of
@@ -111,7 +110,6 @@ pub struct Board {
  *      the Board trait
  */
 impl Board {
-
 	/**
 	 * @brief draw method:
 	 *     draw the current state of the
