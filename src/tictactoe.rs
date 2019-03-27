@@ -110,14 +110,14 @@ pub struct Board {
  *      the Board trait
  */
 impl Board {
-	/**
-	 * @brief draw method:
-	 *     draw the current state of the
-	 *     board
-	 *
-	 * @param[in] self:
-	 *     immutable reference to self
-	 */
+   /**
+	* @brief draw method:
+	*     draw the current state of the
+	*     board
+	*
+	* @param[in] self:
+	*     immutable reference to self
+	*/
     pub fn draw(&self) {
     	println!("  A B C");
     	println!("0 {0} {1} {2}", self.a0, self.b0, self.c0);
