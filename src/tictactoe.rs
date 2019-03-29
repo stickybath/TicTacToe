@@ -1,12 +1,14 @@
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
+use std::io::stdin;
 
 /**
  * @brief Cell enumuration:
  *     enumuration of the states each cell that
- *     comprise the board can be, where:
+ *     comprise the board
  */
+#[derive(PartialEq)]
 enum Cell {
     Empty, //cell is empty
     O,     //cell is occupied by player O
@@ -16,7 +18,7 @@ enum Cell {
 //Default trait implementation for Cell
 impl Default for Cell {
     /**
-     * @brief default method
+     * @brief default method:
      *     initializes default value 
      */
     fn default() -> Self {
@@ -27,7 +29,7 @@ impl Default for Cell {
 //Display trait implementation for Cell
 impl Display for Cell {
     /**
-     * @brief fmt method
+     * @brief fmt method:
      *     allows for formatted printing of
      *     the enumerated value
      *
@@ -53,7 +55,7 @@ impl Display for Cell {
 //Cell trait
 impl Cell {
     /**
-     * @brief set method
+     * @brief set method:
      *     set the value of the cell
      *
      * @param[in] self:
@@ -103,7 +105,7 @@ impl Board {
      * @param[in] self:
      *     immutable reference to self
      */
-    pub fn draw(&self) {
+    fn draw(&self) {
         println!("  A B C");
         println!("0 {0} {1} {2}", self.a0, self.b0, self.c0);
         println!("1 {0} {1} {2}", self.a1, self.b1, self.c1);
@@ -130,7 +132,7 @@ impl Board {
      *     success: true
      *     failure: false
      */
-    pub fn process_turn(&mut self, player: char, position: &str) -> bool {
+    fn process_turn(&mut self, player: char, position: &str) -> bool {
         match player {
             'o' => (),          //ensure the player is either 'o'
             'x' => (),          //or 'x'
@@ -148,5 +150,223 @@ impl Board {
             "c2" => return self.c2.set(player),
             _ => return false
         }
+
     }
+
+    /**
+     * @brief get_state method:
+     *     get the current state of the board
+     *     and determine if there's a winner
+     *
+     * @param[in] self:
+     *     immutable reference to self
+     *
+     * @returns:
+     *     'o':  player o wins
+     *     'x':  player x wins
+     *     null: no winner
+     */
+     fn get_state(&self) -> char {
+        //row 0
+        if self.a0 == self.b0 && self.a0 == self.c0 {
+            match self.a0 {
+                Cell::Empty => return '\0',
+                Cell::O     => return 'o',
+                Cell::X     => return 'x'
+            }
+        //row 1
+        } else if self.a1 == self.b1 && self.a1 == self.c1 {
+            match self.a1 {
+                Cell::Empty => return '\0',
+                Cell::O     => return 'x',
+                Cell::X     => return 'o'
+            }
+        //row 2
+        } else if self.a2 == self.b2 && self.a2 == self.c2 {
+            match self.a2 {
+                Cell::Empty => return '\0',
+                Cell::O     => return 'x',
+                Cell::X     => return 'o'
+            }
+        //column a
+        } else if self.a0 == self.a1 && self.a0 == self.a2 {
+            match self.a0 {
+                Cell::Empty => return '\0',
+                Cell::O     => return 'x',
+                Cell::X     => return 'o'
+            }
+        //column b
+        } else if self.b0 == self.b1 && self.b0 == self.b2 {
+            match self.b0 {
+                Cell::Empty => return '\0',
+                Cell::O     => return 'x',
+                Cell::X     => return 'o'
+            }
+        //column c
+        } else if self.c0 == self.c1 && self.c0 == self.c2 {
+            match self.c0 {
+                Cell::Empty => return '\0',
+                Cell::O     => return 'x',
+                Cell::X     => return 'o'
+            }
+        //diagonal top left
+        } else if self.a0 == self.b1 && self.a0 == self.c2 {
+            match self.a0 {
+                Cell::Empty => return '\0',
+                Cell::O     => return 'x',
+                Cell::X     => return 'o'
+            }
+        //diagonal bot left
+        } else if self.a2 == self.b1 && self.a2 == self.c0 {
+            match self.a2 {
+                Cell::Empty => return '\0',
+                Cell::O     => return 'x',
+                Cell::X     => return 'o'
+            }
+        }
+        return '\0';
+    }
+}
+
+/**
+ * @brief State enumuration:
+ *     enumuration of the game sate
+ */
+ #[derive(PartialEq)]
+pub enum State {
+    InProgress,
+    Stalemate,
+    VictoryO,
+    VictoryX
+}
+
+//Default trait implementation for State
+impl Default for State {
+    /**
+     * @brief default method:
+     *     initializes default value
+     */
+    fn default() -> Self {
+        State::InProgress //cell is empty by default
+    }
+}
+
+//Display trait implementation for State
+impl Display for State {
+    /**
+     * @brief fmt method:
+     *     allows for formatted printing of
+     *     the enumerated value
+     *
+     * @param[in] self:
+     *     immutable reference to self
+     *
+     * @param[in] formatter:
+     *     reference to mutable formatter for printing to
+     *
+     * @returns:
+     *     formatter result
+     */
+    fn fmt(&self, formatter: &mut Formatter) -> Result {
+        let value = match *self {
+            State::InProgress => "in progress".to_string(),
+            State::Stalemate  => "stalemate".to_string(),
+            State::VictoryO   => "o wins".to_string(),
+            State::VictoryX   => "x wins".to_string()
+        };
+        write!(formatter, "{}", value)
+    }
+}
+
+/**
+ * @brief Game structure:
+ *     structure of the objects which comprise
+ *     the game
+ */
+pub struct Game {
+    board: Board,
+    pub state: State,
+    turn:  i32
+}
+
+//Default trait implementation for Game
+impl Default for Game {
+    /**
+     * @brief default method:
+     *     initializes default value
+     */
+    fn default() -> Self {
+        Game {
+            board: Default::default(),
+            state: Default::default(),
+            turn:  1
+        }
+    }
+}
+
+//Game trait
+impl Game {
+    /**
+     * @brief get_player method:
+     *     gets current player based on
+     *     the current turn number.
+     *
+     * @param[in] self:
+     *     immutable reference to self
+     *
+     * @returns:
+     *     player o: 'o'
+     *     player x: 'x'
+     */
+    fn get_player(&self) -> char {
+        match self.turn % 2 {
+            0 => return 'o',
+            _ => return 'x'
+        }
+     }
+
+    /**
+     * @brief set_state method:
+     *     set the current game state
+     *
+     * @param[in] self:
+     *     mutable reference to self
+     */
+     fn set_state(&mut self) {
+        match self.board.get_state() {
+            'o' => self.state = State::VictoryO,
+            'x' => self.state = State::VictoryX,
+            _   => ()
+        }
+        if self.turn > 9 {
+            self.state = State::Stalemate;
+        }
+     }
+
+    /**
+     * @brief take_turn method:
+     *     handle the current turn
+     *
+     * @param[in] self:
+     *     mutable reference to self
+     */
+     pub fn take_turn(&mut self) {
+        let player = self.get_player();
+        println!("\n turn: {}", self.turn);
+        self.board.draw();
+        loop {
+            let mut position = String::new();
+
+            println!("\nplayer {} move: ", player);
+            stdin().read_line(&mut position)
+                   .expect("");
+            position = position.trim_right()
+                               .to_string();
+            if self.board.process_turn(player, &position) {
+                break;
+            }
+        }
+        self.turn += 1;
+        self.set_state();
+     }
 }
